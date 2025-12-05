@@ -19,3 +19,19 @@
     (is (= {:volume-m3 1.0 :weight-t 2.75}
            (core/describe-block 100 100 100)))))
 
+(deftest test-count-blocks-by-category
+  (let [blocks core/blocks
+        counts (core/count-blocks-by-category blocks)]
+    (is (= 4 (get counts 1)))
+    (is (= 4 (get counts 2)))
+    (is (= 2 (get counts 3)))))
+
+(deftest test-determine-category
+  (is (= 1 (core/determine-category "no cracks and uniform color")))
+  (is (= 2 (core/determine-category "visible veins and small cracks")))
+  (is (= 3 (core/determine-category "many cracks and bad color"))))
+
+(deftest test-determine-class
+  (is (= "A" (core/determine-class 5)))
+  (is (= "B" (core/determine-class 30)))
+  (is (= "C" (core/determine-class 60))))
