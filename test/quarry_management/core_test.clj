@@ -35,3 +35,21 @@
   (is (= "A" (core/determine-class 5)))
   (is (= "B" (core/determine-class 30)))
   (is (= "C" (core/determine-class 60))))
+
+(deftest test-filter-and-summarize
+  (let [result (core/filter-and-summarize core/blocks "A" 1)]
+    (is (= (count result) 4))
+    (is (= (map :id result) [0 2 5 8]))))
+
+(deftest test-block-price
+  (is (= (core/block-price {:class "A" :category 1 :weight-t 10})
+         (* 10 (get core/price-per-ton ["A" 1]))))
+  (is (= (core/block-price {:class "B" :category 2 :weight-t 5})
+         (* 5 (get core/price-per-ton ["B" 2])))))
+
+(deftest test-block-price-total
+  (is (= (core/block-price-total core/blocks)
+         (reduce (fn [acc block]
+                   (+ acc (core/block-price block)))
+                 0
+                 core/blocks))))
