@@ -1,12 +1,15 @@
-(ns quarry-management.gui)
+(ns quarry-management.gui.main
+  (:require [quarry-management.gui.daily-extraction :as daily]
+            [quarry-management.gui.inventory :as inventory]
+            [quarry-management.gui.pricing :as pricing]))
 
 (defn main-frame []
   (let [frame (javax.swing.JFrame. "Quarry Management System")
         panel (javax.swing.JPanel.)]
 
-    (doseq [[label action] [["Daily Extraction" #(println "Daily Extraction clicked")]
-                            ["Inventory" #(println "Inventory clicked")]
-                            ["Pricing" #(println "Pricing clicked")]]]
+    (doseq [[label action] [["Daily Extraction" daily/open]
+                            ["Inventory" inventory/open]
+                            ["Pricing" pricing/open]]]
       (let [btn (javax.swing.JButton. ^String label)]
         (.addActionListener btn
                             (proxy [java.awt.event.ActionListener] []
