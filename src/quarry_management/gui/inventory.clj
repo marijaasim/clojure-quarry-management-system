@@ -4,7 +4,8 @@
   (:import
     [javax.swing JFrame JPanel JScrollPane JTable JButton]
     [javax.swing.table DefaultTableModel]
-    [java.awt BorderLayout FlowLayout]))
+    [java.awt BorderLayout FlowLayout]
+    [javax.swing JOptionPane]))
 
 (defn open []
   (let [frame (JFrame. "Inventory")
@@ -37,7 +38,16 @@
     (.addActionListener edit-btn
                         (proxy [java.awt.event.ActionListener] []
                           (actionPerformed [_]
-                            (block-info/open))))
+                            (let [row (.getSelectedRow table)]
+                              (if (< row 0)
+                                (JOptionPane/showMessageDialog
+                                  frame
+                                  "Please select a block from the table first."
+                                  "No selection"
+                                  JOptionPane/WARNING_MESSAGE)
+                                (let [id (.getValueAt table row 0)
+                                      block (first (filter #(= (:id %) id) block/blocks))]
+                                  (block-info/open block)))))))
 
     (.addActionListener delete-btn
                         (proxy [java.awt.event.ActionListener] []
