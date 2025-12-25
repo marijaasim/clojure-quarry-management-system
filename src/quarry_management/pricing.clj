@@ -15,7 +15,7 @@
   "Returns the estimated price of a block based on its class and category, multiplied by weight."
   [block]
   (let [key [(:class block) (:category block)]
-        price-per-t (get price-per-ton key 0)]  ;; 0 ako ne postoji kombinacija
+        price-per-t (get price-per-ton key 0)]
     (* price-per-t (:weight-t block))))
 
 (defn block-price-total
