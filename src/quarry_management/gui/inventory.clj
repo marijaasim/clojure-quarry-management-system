@@ -16,7 +16,7 @@
                (map (fn [b]
                       (into-array Object
                                   [(:id b)
-                                   (:weight-t b)
+                                   (double (:weight-t b))
                                    (:class b)
                                    (:category b)]))
                     block/blocks))

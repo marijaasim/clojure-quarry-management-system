@@ -1,16 +1,4 @@
-(ns quarry-management.inventory
-  (:require [quarry-management.block :as block]))
-
-(def inventory (atom block/blocks))
-
-(defn add-block [new-block]
-  (swap! inventory conj new-block))
-
-(defn remove-block [id]
-  (swap! inventory #(remove (fn [b] (= (:id b) id)) %)))
-
-(defn list-blocks []
-  @inventory)
+(ns quarry-management.inventory)
 
 (defn count-blocks-by-category
   "Returns a map with counts of blocks per category."

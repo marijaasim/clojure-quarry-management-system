@@ -1,2 +1,0 @@
-(ns quarry-management.core)
-

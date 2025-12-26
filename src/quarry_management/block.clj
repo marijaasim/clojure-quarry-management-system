@@ -1,17 +1,9 @@
 (ns quarry-management.block
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [quarry-management.db :as db]))
 
 (def blocks
-  [{:id 0 :length-cm 200 :width-cm 150 :height-cm 120 :volume-m3 3.6 :weight-t 9.9 :class "A" :category 1}
-   {:id 1 :length-cm 210 :width-cm 160 :height-cm 130 :volume-m3 4.37 :weight-t 12.0 :class "B" :category 2}
-   {:id 2 :length-cm 190 :width-cm 140 :height-cm 120 :volume-m3 3.19 :weight-t 8.8 :class "A" :category 1}
-   {:id 3 :length-cm 180 :width-cm 150 :height-cm 110 :volume-m3 2.97 :weight-t 8.2 :class "C" :category 3}
-   {:id 4 :length-cm 220 :width-cm 170 :height-cm 140 :volume-m3 5.26 :weight-t 14.5 :class "B" :category 2}
-   {:id 5 :length-cm 200 :width-cm 150 :height-cm 120 :volume-m3 3.6 :weight-t 9.9 :class "A" :category 1}
-   {:id 6 :length-cm 210 :width-cm 160 :height-cm 130 :volume-m3 4.37 :weight-t 12.0 :class "B" :category 2}
-   {:id 7 :length-cm 195 :width-cm 145 :height-cm 125 :volume-m3 3.53 :weight-t 9.7 :class "C" :category 3}
-   {:id 8 :length-cm 205 :width-cm 155 :height-cm 125 :volume-m3 3.97 :weight-t 10.9 :class "A" :category 1}
-   {:id 9 :length-cm 215 :width-cm 165 :height-cm 135 :volume-m3 4.79 :weight-t 13.2 :class "B" :category 2}])
+  (db/get-all-blocks))
 
 (defn volume-m3
   "Calculates volume in m³ from dimensions in cm."

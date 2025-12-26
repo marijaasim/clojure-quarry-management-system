@@ -9,7 +9,7 @@
   (let [frame (JFrame. "Block Info")
         panel (JPanel. (GridLayout. 0 2 5 5))
 
-        id-field (JTextField. "0")
+        id-field (JTextField. "")
         length-field (JTextField. "")
         width-field (JTextField. "")
         height-field (JTextField. "")
