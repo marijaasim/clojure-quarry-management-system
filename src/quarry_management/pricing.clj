@@ -11,6 +11,9 @@
    ["C" 2] 55
    ["C" 3] 40})
 
+(defn get-prices []
+  {:price-per-ton price-per-ton})
+
 (defn block-price
   "Returns the estimated price of a block based on its class and category, multiplied by weight."
   [block]

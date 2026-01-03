@@ -1,0 +1,18 @@
+(ns quarry-management.server
+  (:require
+    [ring.adapter.jetty :as jetty]
+    [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+    [ring.middleware.file :refer [wrap-file]]
+    [compojure.core :refer [routes GET POST]]
+    [quarry-management.api :as api]))
+
+(def app
+  (-> (routes
+        (GET "/prices" [] api/get-prices)
+        (POST "/calculate-price" req (api/calculate-price req)))
+      (wrap-json-body {:keywords? true})
+      wrap-json-response
+      (ring.middleware.file/wrap-file "public")))
+
+(defn -main []
+  (jetty/run-jetty app {:port 3000 :join? false}))

@@ -1,0 +1,4 @@
+-m
+shadow.cljs.devtools.cli
+watch
+app

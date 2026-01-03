@@ -1,0 +1,1 @@
+["^ ","~$block-info",["^ ","~:row",4,"~:col",1,"~:fixed-arities",["~#set",[1]],"~:name","^0","~:ns","~$quarry-management.frontend.blockinfo","~:top-ns","^7","~:arities",["^ ","~i1",["^ ","~:ret","~:vector"]],"~:type","~:fn"],"~:filename","/Users/marijasimovic/IdeaProjects/QuarryManagement/src/quarry_management/frontend/block-info.cljs"]
