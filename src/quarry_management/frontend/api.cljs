@@ -44,3 +44,14 @@
           (.then callback)
           (.catch #(js/console.error "Error calculating price:" %))))
 
+(defn calculate-revenue-from-to [from to callback]
+      (-> (fetch-json (str api-url "/revenue-from-to")
+                      {:method "POST"
+                       :headers #js {"Content-Type" "application/json"}
+                       :body (js/JSON.stringify
+                               #js {:from from
+                                    :to   to})})
+          (.then callback)
+          (.catch #(js/console.error "Error calculating revenue:" %))))
+
+

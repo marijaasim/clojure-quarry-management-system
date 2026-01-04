@@ -2,16 +2,13 @@
   (:require [reagent.core :as r]
             [quarry-management.frontend.api :as api]))
 
-(def prices (r/atom {}))
 (def selected-class (r/atom ""))
 (def selected-category (r/atom ""))
 (def mass (r/atom ""))
 (def calculated-price (r/atom nil))
-(def blocks (r/atom []))
-
-(defn load-data []
-      (api/get-prices #(reset! prices %))
-      (api/get-blocks #(reset! blocks %)))
+(def date-from (r/atom ""))
+(def date-to (r/atom ""))
+(def revenue (r/atom nil))
 
 (def price-per-ton
   {"A" {1 100 2 90 3 80}
@@ -50,8 +47,7 @@
 
 (defn page []
       (r/create-class
-        {:component-did-mount load-data
-         :reagent-render
+        {:reagent-render
          (fn []
              [:div
               [:h2 "Price"]
@@ -91,6 +87,30 @@
                (when @calculated-price
                      [:div {:style {:margin-top "10px"
                                     :font-weight "bold"}}
-                      "Price: " @calculated-price])]])}))
+                      "Price: " @calculated-price])]
+              [:div {:style {:margin-top "30px"}}
+               [:label "Date from: "]
+               [:input {:type "date"
+                        :value @date-from
+                        :on-change #(reset! date-from (.. % -target -value))}]
 
+               [:label {:style {:margin-left "10px"}} "Date to: "]
+               [:input {:type "date"
+                        :value @date-to
+                        :on-change #(reset! date-to (.. % -target -value))}]
 
+               [:button
+                {:style {:margin-left "10px"}
+                 :on-click
+                 (fn []
+                     (api/calculate-revenue-from-to
+                       @date-from
+                       @date-to
+                       (fn [result]
+                           (reset! revenue (:revenue result)))))}
+                "Calculate Total Revenue"]
+
+               (when @revenue
+                     [:div {:style {:margin-top "10px"
+                                    :font-weight "bold"}}
+                      "Revenue: " @revenue])]])}))

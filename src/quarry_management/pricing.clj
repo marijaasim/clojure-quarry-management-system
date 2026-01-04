@@ -1,4 +1,6 @@
-(ns quarry-management.pricing)
+(ns quarry-management.pricing
+  (:require [quarry-management.db :as db])
+  (:import [java.time LocalDate]))
 
 (def price-per-ton
   {["A" 1] 100
@@ -28,3 +30,27 @@
             (+ acc (block-price block)))
           0
           blocks))
+
+(defn revenue-per-day []
+  (let [blocks (db/get-extraction-with-blocks)]
+    (->> blocks
+         (group-by :extraction-date)
+         (map (fn [[date bs]]
+                {:date    date
+                 :revenue (reduce + (map block-price bs))})))))
+
+(defn revenue-on-day [^LocalDate date]
+  (let [blocks (db/get-extraction-with-blocks)]
+    (->> blocks
+         (filter #(= (.toLocalDate (:extraction-date %)) date))
+         (map block-price)
+         (reduce + 0))))
+
+(defn dates-between [from to]
+  (take-while (fn [d] (not (.isAfter d to)))
+              (iterate #(.plusDays % 1) from)))
+
+(defn revenue-from-to [from to]
+  (->> (dates-between from to)
+       (map revenue-on-day)
+       (reduce +)))

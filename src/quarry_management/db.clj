@@ -1,6 +1,7 @@
 (ns quarry-management.db
   (:require [next.jdbc :as jdbc]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [java.time LocalDate]))
 
 (def db-spec
   {:dbtype "postgresql"
@@ -19,3 +20,11 @@
 (defn get-all-blocks []
   (map change_to-
        (jdbc/execute! ds ["SELECT * FROM block"])))
+
+(defn get-extraction-with-blocks []
+  (map change_to-
+       (jdbc/execute! ds
+                      ["SELECT b.*, d.extraction_date
+           FROM block b
+           JOIN daily_extraction d
+             ON b.daily_extraction_id = d.id"])))
