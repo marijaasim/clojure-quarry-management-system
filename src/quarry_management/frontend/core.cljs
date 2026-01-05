@@ -64,6 +64,3 @@
                      (reset! root (rdom/create-root el))))
 
       (rdom/render @root [app]))
-
-
-

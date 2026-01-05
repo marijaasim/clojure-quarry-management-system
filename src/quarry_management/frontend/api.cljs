@@ -15,6 +15,12 @@
           (.then callback)
           (.catch #(js/console.error "Error fetching blocks:" %))))
 
+(defn get-block-details [id callback]
+      (-> (fetch-json (str api-url "/api/blocks/" id "/details")
+                      {:method "GET"})
+          (.then callback)
+          (.catch #(js/console.error "Error fetching block details:" %))))
+
 (defn create-block [block-data callback]
       (-> (fetch-json (str api-url "/blocks")
                       {:method "POST"
@@ -23,13 +29,13 @@
           (.then callback)
           (.catch #(js/console.error "Error creating block:" %))))
 
-(defn update-block [id block-data callback]
-      (-> (fetch-json (str api-url "/blocks/" id)
-                      {:method "PUT"
+(defn update-block [data callback]
+      (-> (fetch-json (str api-url "/api/blocks/update")
+                      {:method "POST"
                        :headers #js {"Content-Type" "application/json"}
-                       :body (js/JSON.stringify (clj->js block-data))})
+                       :body (js/JSON.stringify (clj->js data))})
           (.then callback)
-          (.catch #(js/console.error "Error updating block:" %))))
+          (.catch #(js/console.error "Update block error:" %))))
 
 (defn get-prices [callback]
       (-> (fetch-json (str api-url "/prices") {:method "GET"})
@@ -53,5 +59,3 @@
                                     :to   to})})
           (.then callback)
           (.catch #(js/console.error "Error calculating revenue:" %))))
-
-

@@ -11,7 +11,8 @@
         (GET "/prices" [] api/get-prices)
         (POST "/calculate-price" req (api/calculate-price req))
         (POST "/revenue-from-to" req (api/calculate-revenue-from-to req))
-        (GET "/api/blocks" req (api/get-extraction-with-blocks req)))
+        (GET "/api/blocks" req (api/get-extraction-with-blocks req))
+        (POST "/api/blocks/update" req (api/update-block req)))
       (wrap-json-body {:keywords? true})
       wrap-json-response
       (ring.middleware.file/wrap-file "public")))

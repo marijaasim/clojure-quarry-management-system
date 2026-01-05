@@ -29,3 +29,17 @@
            FROM block b
            JOIN daily_extraction d
              ON b.daily_extraction_id = d.id"])))
+
+(defn update-block! [{:keys [id length-cm width-cm height-cm volume-m3 weight-t category class]}]
+  (jdbc/execute! ds
+                 ["UPDATE block
+      SET length_cm = ?, width_cm = ?, height_cm = ?,
+          volume_m3 = ?, weight_t = ?, category = ?, class = ?
+      WHERE id = ?"
+                  length-cm width-cm height-cm volume-m3 weight-t category class id]))
+
+(defn get-block-by-id [id]
+  (first
+    (jdbc/execute!
+      ds
+      ["SELECT * FROM block WHERE id = ?" id])))

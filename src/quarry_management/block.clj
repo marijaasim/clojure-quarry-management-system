@@ -36,15 +36,15 @@
 (defn determine-class
   "Assigns a usability class (A, B, or C) based on waste percentage."
   [waste-percentage]
-  (cond                         ;; ne moze case jer radi samo sa konstantama, a ja ovde imam intervale
+  (cond
     (<= waste-percentage 19)
-    "A"   ;; minimal waste
+    "A"
 
     (and (>= waste-percentage 20) (<= waste-percentage 40))
-    "B"   ;; moderate waste
+    "B"
 
     (>= waste-percentage 41)
-    "C"   ;; high waste
+    "C"
 
     :else
     "Unknown"))

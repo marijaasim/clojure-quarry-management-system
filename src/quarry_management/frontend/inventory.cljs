@@ -5,6 +5,23 @@
 
 (def blocks (r/atom []))
 (def displayed-blocks (r/atom []))
+(def selected-block (r/atom nil))
+(def edit-form (r/atom nil))
+(def edit-error (r/atom nil))
+
+(defn class->waste [cls]
+      (case cls
+            "A" "<=19"
+            "B" "20-40"
+            "C" ">=41"
+            ""))
+
+(defn category->characteristics [cat]
+      (case cat
+            1 "no cracks|minimal cracks|uniform color"
+            2 "visible veins|small cracks|not perfect"
+            3 "many cracks|bad color|deformations"
+            ""))
 
 (def filters
   (r/atom {:mass-range nil
@@ -61,15 +78,11 @@
       (reset! displayed-blocks @blocks))
 
 (defn filters-ui []
-      [:div {:style {:display "flex" :gap "10px" :flex-wrap "wrap" :margin-bottom "15px"}}
+      [:div {:style {:display "flex" :gap "10px" :margin-bottom "15px"}}
 
        [:select
         {:value (:mass-range @filter-ui)
-         :on-change #(do
-                       (swap! filter-ui assoc :mass-range (.. % -target -value))
-                       (swap! filters assoc :mass-range
-                              (when-not (= (.. % -target -value) "")
-                                        (keyword (.. % -target -value)))))}
+         :on-change #(swap! filter-ui assoc :mass-range (.. % -target -value))}
         [:option {:value ""} "Mass (t)"]
         [:option {:value "lt04"} "< 0.4"]
         [:option {:value "04-08"} "0.4 – 0.8"]
@@ -83,19 +96,11 @@
        [:input
         {:type "date"
          :value (:date @filter-ui)
-         :on-change #(do
-                       (swap! filter-ui assoc :date (.. % -target -value))
-                       (swap! filters assoc :date
-                              (when-not (= (.. % -target -value) "")
-                                        (.. % -target -value))))}]
+         :on-change #(swap! filter-ui assoc :date (.. % -target -value))}]
 
        [:select
         {:value (:class @filter-ui)
-         :on-change #(do
-                       (swap! filter-ui assoc :class (.. % -target -value))
-                       (swap! filters assoc :class
-                              (when-not (= (.. % -target -value) "")
-                                        (.. % -target -value))))}
+         :on-change #(swap! filter-ui assoc :class (.. % -target -value))}
         [:option {:value ""} "Class"]
         [:option {:value "A"} "A"]
         [:option {:value "B"} "B"]
@@ -103,59 +108,182 @@
 
        [:select
         {:value (:category @filter-ui)
-         :on-change #(do
-                       (swap! filter-ui assoc :category (.. % -target -value))
-                       (swap! filters assoc :category
-                              (when-not (= (.. % -target -value) "")
-                                        (js/parseInt (.. % -target -value)))))}
+         :on-change #(swap! filter-ui assoc :category (.. % -target -value))}
         [:option {:value ""} "Category"]
         [:option {:value "1"} "1"]
         [:option {:value "2"} "2"]
         [:option {:value "3"} "3"]]
 
-       [:button {:on-click apply-filters} "Filter"]
+       [:button
+        {:on-click #(do
+                      (swap! filters assoc
+                             :mass-range (some-> (:mass-range @filter-ui) not-empty keyword)
+                             :date (not-empty (:date @filter-ui))
+                             :class (not-empty (:class @filter-ui))
+                             :category (some-> (:category @filter-ui) not-empty js/parseInt))
+                      (apply-filters))}
+        "Filter"]
+
        [:button {:on-click reset-filters} "Show all"]])
 
 (def cell-style
-  {:border "1px solid black"
-   :padding "4px"
-   :font-size "13px"
-   :white-space "nowrap"
-   :text-align "center"})
+  {:border "1px solid #ccc" :padding "4px" :font-size "13px" :text-align "center"})
 
 (def header-style
   (assoc cell-style :font-weight "bold" :background "#f2f2f2"))
 
+(defn open-edit []
+      (when-let [b @selected-block]
+                (reset! edit-form
+                        (assoc b
+                               :characteristics (category->characteristics (:category b))
+                               :waste (class->waste (:class b))
+                               :waste-percentage (case (:class b)
+                                                       "A" 19
+                                                       "B" 30
+                                                       "C" 41)))))
+
 (defn blocks-table []
-      [:div {:style {:max-height "400px" :overflow "auto" :border "1px solid #ccc" :display "inline-block"}}
-       [:table {:style {:border-collapse "collapse"}}
-        [:thead
-         [:tr
-          [:th {:style header-style} "ID"]
-          [:th {:style header-style} "Mass (t)"]
-          [:th {:style header-style} "Class"]
-          [:th {:style header-style} "Category"]
-          [:th {:style header-style} "Date Extracted"]]]
-        [:tbody
-         (for [b @displayed-blocks]
-              ^{:key (:id b)}
-              [:tr
-               [:td {:style cell-style} (:id b)]
-               [:td {:style cell-style} (:weight-t b)]
-               [:td {:style cell-style} (:class b)]
-               [:td {:style cell-style} (:category b)]
-               [:td {:style cell-style}
-                (when-let [d (:extraction-date b)]
-                          (subs (str d) 0 10))]])]]])
+      (let [selected-id (:id @selected-block)]
+           [:table {:style {:border-collapse "collapse" :width "100%"}}
+            [:thead
+             [:tr
+              [:th {:style header-style} "ID"]
+              [:th {:style header-style} "Mass (t)"]
+              [:th {:style header-style} "Class"]
+              [:th {:style header-style} "Category"]
+              [:th {:style header-style} "Date Extracted"]]]
+            [:tbody
+             (doall
+               (for [b @displayed-blocks]
+                    (let [active? (= (:id b) selected-id)]
+                         ^{:key (:id b)}
+                         [:tr
+                          {:on-click #(reset! selected-block b)
+                           :style {:cursor "pointer"
+                                   :background (when active? "#cce5ff")
+                                   :font-weight (when active? "bold")}}
+                          [:td {:style cell-style} (:id b)]
+                          [:td {:style cell-style} (.toFixed (:weight-t b) 3)]
+                          [:td {:style cell-style} (:class b)]
+                          [:td {:style cell-style} (:category b)]
+                          [:td {:style cell-style}
+                           (subs (str (:extraction-date b)) 0 10)]])))]]))
+
+(defn edit-panel []
+      (when @edit-form
+            [:div {:style {:width "280px" :border-left "2px solid #ccc" :padding "10px"}}
+             [:h3 "Edit block"]
+
+             [:div "ID"]
+             [:input {:value (:id @edit-form) :disabled true}]
+
+             (doall
+               (for [[k label] [[:length-cm "Length (cm)"]
+                                [:width-cm "Width (cm)"]
+                                [:height-cm "Height (cm)"]]]
+                    ^{:key k}
+                    [:<>
+                     [:div label]
+                     [:input
+                      {:value (get @edit-form k)
+                       :on-change #(let [v (.. % -target -value)]
+                                        (swap! edit-form assoc k
+                                               (when (not-empty v)
+                                                     (js/parseFloat v))))}]]))
+
+             [:div "Mass (t)"]
+             [:input {:value (.toFixed (:weight-t @edit-form) 3) :disabled true}]
+
+             [:div "Characteristics"]
+             [:select
+              {:value (:characteristics @edit-form)
+               :on-change #(swap! edit-form assoc
+                                  :characteristics
+                                  (.. % -target -value))}
+              [:option "no cracks|minimal cracks|uniform color"]
+              [:option "visible veins|small cracks|not perfect"]
+              [:option "many cracks|bad color|deformations"]]
+
+             [:div
+              {:style {:margin-top "6px"
+                       :font-size "13px"
+                       :color "#555"}}
+              (when (:category @edit-form)
+                    (str "Category: " (:category @edit-form)))]
+
+             [:div "Waste %"]
+             [:select
+              {:value (:waste @edit-form)
+               :on-change #(let [v (.. % -target -value)]
+                                (swap! edit-form assoc
+                                       :waste v
+                                       :waste-percentage
+                                       (case v
+                                             "<=19" 19
+                                             "20-40" 30
+                                             ">=41" 41
+                                             nil)))}
+              [:option "<=19"]
+              [:option "20-40"]
+              [:option ">=41"]]
+
+             [:div
+              {:style {:margin-top "6px"
+                       :font-size "13px"
+                       :color "#555"}}
+              (when (:class @edit-form)
+                    (str "Class: " (:class @edit-form)))]
+
+             (when @edit-error
+                   [:div {:style {:color "red"
+                                  :margin-top "8px"
+                                  :font-size "13px"}}
+                    @edit-error])
+
+             [:div {:style {:display "flex" :gap "10px" :margin-top "10px"}}
+
+              [:button
+               {:on-click
+                #(let [{:keys [length-cm width-cm height-cm waste]} @edit-form]
+                      (cond
+                        (or (nil? waste) (= waste ""))
+                        (reset! edit-error "Waste percentage must be selected.")
+
+                        (or (<= (or length-cm 0) 0)
+                            (<= (or width-cm 0) 0)
+                            (<= (or height-cm 0) 0))
+                        (reset! edit-error "Dimensions must be greater than 0.")
+
+                        :else
+                        (do
+                          (reset! edit-error nil)
+                          (api/update-block
+                            @edit-form
+                            (fn []
+                                (load-blocks)
+                                (reset! edit-form nil)
+                                (reset! selected-block nil))))))}
+               "Save"]
+
+              [:button
+               {:on-click #(do
+                             (reset! edit-form nil)
+                             (reset! selected-block nil))}
+               "Cancel"]]]))
 
 (defn page []
       (r/create-class
         {:component-did-mount load-blocks
          :reagent-render
          (fn []
-             [:div
-              [:h2 "Inventory"]
-              [filters-ui]
-              (if (empty? @displayed-blocks)
-                [:p "No matching blocks."]
-                [blocks-table])])}))
+             [:div {:style {:display "flex"}}
+              [:div {:style {:flex "1"}}
+               [:h2 "Inventory"]
+               [filters-ui]
+               [:div {:style {:max-height "400px" :overflow "auto"}}
+                [blocks-table]]
+               [:button {:on-click open-edit
+                         :disabled (nil? @selected-block)}
+                "Edit block"]]
+              [edit-panel]])}))

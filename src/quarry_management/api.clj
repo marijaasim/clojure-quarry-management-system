@@ -2,7 +2,8 @@
   (:require
     [quarry-management.pricing :as pricing]
     [ring.util.response :as resp]
-    [quarry-management.db :as db])
+    [quarry-management.db :as db]
+    [quarry-management.block :as b])
   (:import
     [java.time LocalDate]))
 
@@ -32,3 +33,26 @@
 (defn get-extraction-with-blocks [_]
   (resp/response
     (db/get-extraction-with-blocks)))
+
+(defn update-block [req]
+  (let [{:keys [id length-cm width-cm height-cm
+                characteristics waste-percentage]} (:body req)]
+    (when-not (and length-cm width-cm height-cm)
+      (throw (ex-info "Missing dimensions"
+                      {:length length-cm
+                       :width width-cm
+                       :height height-cm})))
+    (let [desc (b/describe-block length-cm width-cm height-cm)
+          category (b/determine-category characteristics)
+          class (b/determine-class waste-percentage)]
+      (db/update-block!
+        {:id id
+         :length-cm length-cm
+         :width-cm width-cm
+         :height-cm height-cm
+         :volume-m3 (:volume-m3 desc)
+         :weight-t (:weight-t desc)
+         :category category
+         :class class})
+      {:status 200
+       :body {}})))
