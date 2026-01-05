@@ -11,7 +11,7 @@
                                (throw (js/Error. (str "HTTP " (.-status %))))))))
 
 (defn get-blocks [callback]
-      (-> (fetch-json (str api-url "/blocks") {:method "GET"})
+      (-> (fetch-json (str api-url "/api/blocks") {:method "GET"})
           (.then callback)
           (.catch #(js/console.error "Error fetching blocks:" %))))
 

@@ -2,7 +2,8 @@
   (:require
     [reagent.core :as r]
     [reagent.dom.client :as rdom]
-    [quarry-management.frontend.price :as price]))
+    [quarry-management.frontend.price :as price]
+    [quarry-management.frontend.inventory :as inventory]))
 
 (def current-page (r/atom :price))
 
@@ -27,7 +28,7 @@
                  :width "100%"
                  :margin "10px 0"
                  :padding "10px"}
-         :on-click #(js/alert "Inventory clicked")}
+         :on-click #(reset! current-page :inventory)}
         "Inventory"]
 
        [:button
@@ -43,7 +44,8 @@
                      :padding "20px"
                      :box-sizing "border-box"}}
        (case @current-page
-             :price [price/page]
+             :price     [price/page]
+             :inventory [inventory/page]
              [:div "Select a menu item"])])
 
 (defn app []

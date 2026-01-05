@@ -1,7 +1,8 @@
 (ns quarry-management.api
   (:require
     [quarry-management.pricing :as pricing]
-    [ring.util.response :as resp])
+    [ring.util.response :as resp]
+    [quarry-management.db :as db])
   (:import
     [java.time LocalDate]))
 
@@ -23,3 +24,11 @@
         to-date   (LocalDate/parse to)
         revenue   (pricing/revenue-from-to from-date to-date)]
     (resp/response {:revenue revenue})))
+
+(defn get-all-blocks []
+  {:status 200
+   :body (db/get-all-blocks)})
+
+(defn get-extraction-with-blocks [_]
+  (resp/response
+    (db/get-extraction-with-blocks)))

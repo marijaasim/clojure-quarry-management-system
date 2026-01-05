@@ -4,7 +4,7 @@ quarry_management.frontend.core.menu = (function quarry_management$frontend$core
 return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div","div",1057191632),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"style","style",-496642736),new cljs.core.PersistentArrayMap(null, 6, [new cljs.core.Keyword(null,"width","width",-384071477),"200px",new cljs.core.Keyword(null,"padding","padding",1660304693),"20px",new cljs.core.Keyword(null,"border-right","border-right",-668932860),"1px solid #ccc",new cljs.core.Keyword(null,"float","float",-1732389368),"left",new cljs.core.Keyword(null,"height","height",1025178622),"100vh",new cljs.core.Keyword(null,"box-sizing","box-sizing",-1956090239),"border-box"], null)], null),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"button","button",1456579943),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"style","style",-496642736),new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"display","display",242065432),"block",new cljs.core.Keyword(null,"width","width",-384071477),"100%",new cljs.core.Keyword(null,"margin","margin",-995903681),"10px 0",new cljs.core.Keyword(null,"padding","padding",1660304693),"10px"], null),new cljs.core.Keyword(null,"on-click","on-click",1632826543),(function (){
 return alert("Daily Extraction clicked");
 })], null),"Daily Extraction"], null),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"button","button",1456579943),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"style","style",-496642736),new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"display","display",242065432),"block",new cljs.core.Keyword(null,"width","width",-384071477),"100%",new cljs.core.Keyword(null,"margin","margin",-995903681),"10px 0",new cljs.core.Keyword(null,"padding","padding",1660304693),"10px"], null),new cljs.core.Keyword(null,"on-click","on-click",1632826543),(function (){
-return alert("Inventory clicked");
+return cljs.core.reset_BANG_(quarry_management.frontend.core.current_page,new cljs.core.Keyword(null,"inventory","inventory",860201871));
 })], null),"Inventory"], null),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"button","button",1456579943),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"style","style",-496642736),new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"display","display",242065432),"block",new cljs.core.Keyword(null,"width","width",-384071477),"100%",new cljs.core.Keyword(null,"margin","margin",-995903681),"10px 0",new cljs.core.Keyword(null,"padding","padding",1660304693),"10px"], null),new cljs.core.Keyword(null,"on-click","on-click",1632826543),(function (){
 return cljs.core.reset_BANG_(quarry_management.frontend.core.current_page,new cljs.core.Keyword(null,"price","price",22129180));
 })], null),"Price"], null)], null);
@@ -15,6 +15,10 @@ var G__11933__$1 = (((G__11933 instanceof cljs.core.Keyword))?G__11933.fqn:null)
 switch (G__11933__$1) {
 case "price":
 return new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [quarry_management.frontend.price.page], null);
+
+break;
+case "inventory":
+return new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [quarry_management.frontend.inventory.page], null);
 
 break;
 default:

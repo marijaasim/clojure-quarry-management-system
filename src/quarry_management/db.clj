@@ -1,6 +1,7 @@
 (ns quarry-management.db
   (:require [next.jdbc :as jdbc]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [quarry-management.db :as db])
   (:import [java.time LocalDate]))
 
 (def db-spec
