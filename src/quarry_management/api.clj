@@ -56,3 +56,9 @@
          :class class})
       {:status 200
        :body {}})))
+
+(defn delete-block [req]
+  (let [{:keys [id]} (:body req)]
+    (db/delete-block! id)
+    {:status 200
+     :body {:ok true}}))

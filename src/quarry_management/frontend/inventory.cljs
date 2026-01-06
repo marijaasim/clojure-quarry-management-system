@@ -285,5 +285,19 @@
                 [blocks-table]]
                [:button {:on-click open-edit
                          :disabled (nil? @selected-block)}
-                "Edit block"]]
+                "Edit block"]
+               [:button
+                {:style {:margin-left "10px"
+                         :background "#ffdddd"}
+                 :disabled (nil? @selected-block)
+                 :on-click #(do
+                              (js/console.log "SELECTED BLOCK =" (clj->js @selected-block))
+                              (js/console.log "ID =" (:id @selected-block))
+                              (when (js/confirm "Are you sure you want to delete this block?")
+                                    (api/delete-block
+                                      (:id @selected-block)
+                                      (fn []
+                                          (load-blocks)
+                                          (reset! selected-block nil)))))}
+                "Delete block"]]
               [edit-panel]])}))

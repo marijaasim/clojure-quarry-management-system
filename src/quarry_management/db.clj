@@ -40,6 +40,9 @@
 
 (defn get-block-by-id [id]
   (first
-    (jdbc/execute!
-      ds
+    (jdbc/execute! ds
       ["SELECT * FROM block WHERE id = ?" id])))
+
+(defn delete-block! [id]
+  (jdbc/execute! ds
+    ["DELETE FROM block WHERE id = ?" id]))

@@ -37,6 +37,18 @@
           (.then callback)
           (.catch #(js/console.error "Update block error:" %))))
 
+(defn delete-block [id on-success]
+      (-> (js/fetch
+            (str api-url "/api/blocks/delete")
+            #js {:method "POST"
+                 :headers #js {"Content-Type" "application/json"}
+                 :body (.stringify js/JSON #js {:id id})})
+          (.then (fn [res]
+                     (when (.-ok res)
+                           (on-success))))
+          (.catch (fn [err]
+                      (js/console.error "Delete error:" err)))))
+
 (defn get-prices [callback]
       (-> (fetch-json (str api-url "/prices") {:method "GET"})
           (.then callback)
