@@ -13,7 +13,9 @@
         (POST "/revenue-from-to" req (api/calculate-revenue-from-to req))
         (GET "/api/blocks" req (api/get-extraction-with-blocks req))
         (POST "/api/blocks/update" req (api/update-block req))
-        (POST "/api/blocks/delete" req (api/delete-block req)))
+        (POST "/api/blocks/delete" req (api/delete-block req))
+        (POST "/api/blocks/describe" req (api/describe-block req))
+        (POST "/api/daily-extraction/create" req (api/create-daily-extraction req)))
       (wrap-json-body {:keywords? true})
       wrap-json-response
       (ring.middleware.file/wrap-file "public")))

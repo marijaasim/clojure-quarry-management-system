@@ -71,3 +71,22 @@
                                     :to   to})})
           (.then callback)
           (.catch #(js/console.error "Error calculating revenue:" %))))
+
+(defn describe-block [data callback]
+      (-> (js/fetch
+            (str api-url "/api/blocks/describe")
+            #js {:method "POST"
+                 :headers #js {"Content-Type" "application/json"}
+                 :body (.stringify js/JSON (clj->js data))})
+          (.then #(.json %))
+          (.then #(callback (js->clj % :keywordize-keys true)))
+          (.catch #(js/console.error "Describe block error:" %))))
+
+(defn create-daily-extraction [data callback]
+      (-> (fetch-json
+            (str api-url "/api/daily-extraction/create")
+            {:method "POST"
+             :headers #js {"Content-Type" "application/json"}
+             :body (js/JSON.stringify (clj->js data))})
+          (.then callback)
+          (.catch #(js/console.error "Create daily extraction error:" %))))

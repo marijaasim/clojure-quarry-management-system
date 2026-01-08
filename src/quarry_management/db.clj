@@ -46,3 +46,25 @@
 (defn delete-block! [id]
   (jdbc/execute! ds
     ["DELETE FROM block WHERE id = ?" id]))
+
+(defn insert-block! [daily-id block]
+  (jdbc/execute! ds
+    ["INSERT INTO block
+    (length_cm, width_cm, height_cm, volume_m3, weight_t, class, category, daily_extraction_id)
+    VALUES (?,?,?,?,?,?,?,?)"
+     (:length-cm block)
+     (:width-cm block)
+     (:height-cm block)
+     (:volume-m3 block)
+     (:weight-t block)
+     (:class block)
+     (:category block)
+     daily-id]))
+
+(defn insert-daily-extraction! [date total-mass]
+  (jdbc/execute-one! ds
+    ["INSERT INTO daily_extraction
+    (extraction_date, extracted_mass_tons)
+    VALUES (?, ?)
+    RETURNING id"
+     date total-mass]))

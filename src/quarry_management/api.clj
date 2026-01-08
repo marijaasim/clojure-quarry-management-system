@@ -62,3 +62,33 @@
     (db/delete-block! id)
     {:status 200
      :body {:ok true}}))
+
+(defn describe-block [req]
+  (let [{:keys [length-cm width-cm height-cm]} (:body req)
+        desc (b/describe-block length-cm width-cm height-cm)]
+    {:status 200
+     :body desc}))
+
+(defn create-daily-extraction [req]
+  (try
+    (let [{:keys [date total-mass blocks]} (:body req)
+          extraction-date (java.time.LocalDate/parse date)
+          res (db/insert-daily-extraction! extraction-date total-mass)
+          daily-id (:daily_extraction/id res)]
+      (doseq [blk blocks]
+        (let [{:keys [volume-m3 weight-t]}
+              (b/describe-block
+                (:length-cm blk)
+                (:width-cm blk)
+                (:height-cm blk))]
+          (db/insert-block!
+            daily-id
+            (assoc blk
+              :volume-m3 volume-m3
+              :weight-t weight-t))))
+      {:status 200
+       :body {:ok true
+              :daily-extraction-id daily-id}})
+    (catch Exception e
+      {:status 500
+       :body {:error (.getMessage e)}})))

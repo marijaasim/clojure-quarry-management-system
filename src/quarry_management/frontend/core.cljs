@@ -3,7 +3,8 @@
     [reagent.core :as r]
     [reagent.dom.client :as rdom]
     [quarry-management.frontend.price :as price]
-    [quarry-management.frontend.inventory :as inventory]))
+    [quarry-management.frontend.inventory :as inventory]
+    [quarry-management.frontend.daily-extraction :as daily]))
 
 (def current-page (r/atom :price))
 
@@ -20,7 +21,7 @@
                  :width "100%"
                  :margin "10px 0"
                  :padding "10px"}
-         :on-click #(js/alert "Daily Extraction clicked")}
+         :on-click #(reset! current-page :daily-extraction)}
         "Daily Extraction"]
 
        [:button
@@ -46,6 +47,7 @@
        (case @current-page
              :price     [price/page]
              :inventory [inventory/page]
+             :daily-extraction [daily/page]
              [:div "Select a menu item"])])
 
 (defn app []

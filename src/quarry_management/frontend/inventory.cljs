@@ -245,14 +245,16 @@
 
               [:button
                {:on-click
-                #(let [{:keys [length-cm width-cm height-cm waste]} @edit-form]
+                #(let [{:keys [length-cm width-cm height-cm waste characteristics]} @edit-form]
                       (cond
-                        (or (nil? waste) (= waste ""))
-                        (reset! edit-error "Waste percentage must be selected.")
+                        (or (nil? length-cm)
+                            (nil? width-cm)
+                            (nil? height-cm))
+                        (reset! edit-error "All fields are required.")
 
-                        (or (<= (or length-cm 0) 0)
-                            (<= (or width-cm 0) 0)
-                            (<= (or height-cm 0) 0))
+                        (or (<= length-cm 0)
+                            (<= width-cm 0)
+                            (<= height-cm 0))
                         (reset! edit-error "Dimensions must be greater than 0.")
 
                         :else
