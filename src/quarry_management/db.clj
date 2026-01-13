@@ -1,8 +1,6 @@
 (ns quarry-management.db
   (:require [next.jdbc :as jdbc]
-            [clojure.string :as str]
-            [quarry-management.db :as db])
-  (:import [java.time LocalDate]))
+            [clojure.string :as str]))
 
 (def db-spec
   {:dbtype "postgresql"
@@ -37,11 +35,6 @@
           volume_m3 = ?, weight_t = ?, category = ?, class = ?
       WHERE id = ?"
                   length-cm width-cm height-cm volume-m3 weight-t category class id]))
-
-(defn get-block-by-id [id]
-  (first
-    (jdbc/execute! ds
-      ["SELECT * FROM block WHERE id = ?" id])))
 
 (defn delete-block! [id]
   (jdbc/execute! ds

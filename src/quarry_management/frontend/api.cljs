@@ -15,20 +15,6 @@
           (.then callback)
           (.catch #(js/console.error "Error fetching blocks:" %))))
 
-(defn get-block-details [id callback]
-      (-> (fetch-json (str api-url "/api/blocks/" id "/details")
-                      {:method "GET"})
-          (.then callback)
-          (.catch #(js/console.error "Error fetching block details:" %))))
-
-(defn create-block [block-data callback]
-      (-> (fetch-json (str api-url "/blocks")
-                      {:method "POST"
-                       :headers #js {"Content-Type" "application/json"}
-                       :body (js/JSON.stringify (clj->js block-data))})
-          (.then callback)
-          (.catch #(js/console.error "Error creating block:" %))))
-
 (defn update-block [data callback]
       (-> (fetch-json (str api-url "/api/blocks/update")
                       {:method "POST"
@@ -90,3 +76,10 @@
              :body (js/JSON.stringify (clj->js data))})
           (.then callback)
           (.catch #(js/console.error "Create daily extraction error:" %))))
+
+(defn predict [month]
+      (fetch-json
+        (str api-url "/api/prediction")
+        {:method "POST"
+         :headers {"Content-Type" "application/json"}
+         :body (js/JSON.stringify #js {:month month})}))

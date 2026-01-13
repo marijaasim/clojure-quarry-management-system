@@ -1,5 +1,5 @@
 (ns quarry-management.gui.pricing
-  (:require [quarry-management.pricing :as pricing])
+  (:require [quarry-management.price :as pricing])
   (:import [javax.swing JFrame JPanel JLabel JTextField JButton JComboBox JOptionPane]
            [java.awt GridLayout]))
 

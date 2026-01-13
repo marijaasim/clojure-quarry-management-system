@@ -4,9 +4,10 @@
     [reagent.dom.client :as rdom]
     [quarry-management.frontend.price :as price]
     [quarry-management.frontend.inventory :as inventory]
-    [quarry-management.frontend.daily-extraction :as daily]))
+    [quarry-management.frontend.daily-extraction :as daily]
+    [quarry-management.frontend.prediction :as prediction]))
 
-(def current-page (r/atom :price))
+(def current-page (r/atom nil))
 
 (defn menu []
       [:div {:style {:width "200px"
@@ -38,7 +39,15 @@
                  :margin "10px 0"
                  :padding "10px"}
          :on-click #(reset! current-page :price)}
-        "Price"]])
+        "Price"]
+
+       [:button
+        {:style {:display "block"
+                 :width "100%"
+                 :margin "10px 0"
+                 :padding "10px"}
+         :on-click #(reset! current-page :prediction)}
+        "Prediction"]])
 
 (defn content []
       [:div {:style {:margin-left "220px"
@@ -48,6 +57,7 @@
              :price     [price/page]
              :inventory [inventory/page]
              :daily-extraction [daily/page]
+             :prediction [prediction/page]
              [:div "Select a menu item"])])
 
 (defn app []

@@ -15,7 +15,8 @@
         (POST "/api/blocks/update" req (api/update-block req))
         (POST "/api/blocks/delete" req (api/delete-block req))
         (POST "/api/blocks/describe" req (api/describe-block req))
-        (POST "/api/daily-extraction/create" req (api/create-daily-extraction req)))
+        (POST "/api/daily-extraction/create" req (api/create-daily-extraction req))
+        (POST "/api/prediction" req (api/predict req)))
       (wrap-json-body {:keywords? true})
       wrap-json-response
       (ring.middleware.file/wrap-file "public")))

@@ -11,9 +11,9 @@
 (def revenue (r/atom nil))
 
 (def price-per-ton
-  {"A" {1 100 2 90 3 80}
-   "B" {1 85  2 70 3 60}
-   "C" {1 70  2 55 3 40}})
+  {"A" {1 200 2 190 3 180}
+   "B" {1 160  2 150 3 140}
+   "C" {1 120  2 110 3 100}})
 
 (def cell-style
   {:border "1px solid black"

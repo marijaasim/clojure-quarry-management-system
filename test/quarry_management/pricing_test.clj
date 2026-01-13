@@ -1,6 +1,6 @@
 (ns quarry-management.pricing-test
   (:require [clojure.test :refer :all]
-            [quarry-management.pricing :as pricing]
+            [quarry-management.price :as pricing]
             [quarry-management.block :as block]))
 
 (deftest test-block-price

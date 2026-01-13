@@ -1,17 +1,17 @@
-(ns quarry-management.pricing
+(ns quarry-management.price
   (:require [quarry-management.db :as db])
   (:import [java.time LocalDate]))
 
 (def price-per-ton
-  {["A" 1] 100
-   ["A" 2] 90
-   ["A" 3] 80
-   ["B" 1] 85
-   ["B" 2] 70
-   ["B" 3] 60
-   ["C" 1] 70
-   ["C" 2] 55
-   ["C" 3] 40})
+  {["A" 1] 200
+   ["A" 2] 190
+   ["A" 3] 180
+   ["B" 1] 160
+   ["B" 2] 150
+   ["B" 3] 140
+   ["C" 1] 120
+   ["C" 2] 110
+   ["C" 3] 100})
 
 (defn get-prices []
   {:price-per-ton price-per-ton})

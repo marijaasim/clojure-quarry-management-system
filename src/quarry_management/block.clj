@@ -5,6 +5,16 @@
 (def blocks
   (db/get-all-blocks))
 
+;; klasa (A, B i C):
+;; "no cracks|minimal cracks|uniform color" A
+;; "visible veins|small cracks|not perfect" B
+;; "many cracks|bad color|deformations" C
+
+;; kategorija:
+;; 1 - duzina bloka od 250cm
+;; 2 - duzina bloka od 220cm do 250cm
+;; 3 - duzina bloka ispod 220cm
+
 (defn volume-m3
   "Calculates volume in m³ from dimensions in cm."
   [length-cm width-cm height-cm]
@@ -24,27 +34,18 @@
      :weight-t  w}))
 
 (defn determine-category
-  "Assigns a quality category (1, 2, or 3) based on the description text."
+  [length-cm]
+  (cond
+    (> length-cm 250) 1
+    (and (>= length-cm 220) (< length-cm 250)) 2
+    (< length-cm 220) 3
+    :else :unknown))
+
+(defn determine-class
   [description]
   (let [d (str/lower-case description)]
     (cond
-      (re-find #"no cracks|minimal cracks|uniform color" d) 1
-      (re-find #"visible veins|small cracks|not perfect" d) 2
-      (re-find #"many cracks|bad color|deformations" d) 3
-      :else :unknown)))
-
-(defn determine-class
-  "Assigns a usability class (A, B, or C) based on waste percentage."
-  [waste-percentage]
-  (cond
-    (<= waste-percentage 19)
-    "A"
-
-    (and (>= waste-percentage 20) (<= waste-percentage 40))
-    "B"
-
-    (>= waste-percentage 41)
-    "C"
-
-    :else
-    "Unknown"))
+      (re-find #"no cracks|minimal cracks|uniform color" d) "A"
+      (re-find #"visible veins|small cracks|not perfect" d) "B"
+      (re-find #"many cracks|bad color|deformations" d) "C"
+      :else "Unknown")))

@@ -25,7 +25,6 @@
                :width-cm nil
                :height-cm nil
                :characteristics ""
-               :waste ""
                :class nil
                :category nil
                :weight-t nil}))
@@ -59,19 +58,6 @@
               [:option "visible veins|small cracks|not perfect"]
               [:option "many cracks|bad color|deformations"]]
 
-             [:div "Waste %"]
-             [:select
-              {:value (or (:waste @create-form) "")
-               :on-change #(let [v (.. % -target -value)]
-                                (swap! create-form assoc
-                                       :waste v
-                                       :class (case v "<=19" "A" "20-40" "B" ">=41" "C")
-                                       :category (case v "<=19" 1 "20-40" 2 ">=41" 3)))}
-              [:option {:value ""} "-- select --"]
-              [:option "<=19"]
-              [:option "20-40"]
-              [:option ">=41"]]
-
              (when @create-error
                    [:div {:style {:color "red" :margin-top "6px"}} @create-error])
 
@@ -79,13 +65,12 @@
 
               [:button
                {:on-click
-                #(let [{:keys [length-cm width-cm height-cm waste characteristics]} @create-form]
+                #(let [{:keys [length-cm width-cm height-cm characteristics]} @create-form]
                       (cond
                         (or (nil? length-cm)
                             (nil? width-cm)
                             (nil? height-cm)
-                            (empty? characteristics)
-                            (empty? waste))
+                            (empty? characteristics))
                         (reset! create-error "All fields are required.")
 
                         (or (<= length-cm 0)
@@ -99,10 +84,14 @@
                           (api/describe-block
                             {:length-cm length-cm
                              :width-cm width-cm
-                             :height-cm height-cm}
-                            (fn [{:keys [weight-t]}]
+                             :height-cm height-cm
+                             :characteristics characteristics}
+                            (fn [{:keys [weight-t class category]}]
                                 (swap! daily-blocks conj
-                                       (assoc @create-form :weight-t weight-t))
+                                       (assoc @create-form
+                                              :weight-t weight-t
+                                              :class class
+                                              :category category))
                                 (reset! create-form nil))))))}
                "Save"]
 

@@ -1,19 +1,20 @@
 (ns quarry-management.api
   (:require
-    [quarry-management.pricing :as pricing]
+    [quarry-management.price :as price]
     [ring.util.response :as resp]
     [quarry-management.db :as db]
-    [quarry-management.block :as b])
+    [quarry-management.block :as b]
+    [quarry-management.prediction :as p])
   (:import
     [java.time LocalDate]))
 
 (defn get-prices [_request]
   (resp/response
-    {:price-per-ton pricing/price-per-ton}))
+    {:price-per-ton price/price-per-ton}))
 
 (defn calculate-price [request]
   (let [{:keys [class category weight]} (:body request)
-        price (pricing/block-price
+        price (price/block-price
                 {:class class
                  :category category
                  :weight-t weight})]
@@ -23,12 +24,8 @@
   (let [{:keys [from to]} (:body request)
         from-date (LocalDate/parse from)
         to-date   (LocalDate/parse to)
-        revenue   (pricing/revenue-from-to from-date to-date)]
+        revenue   (price/revenue-from-to from-date to-date)]
     (resp/response {:revenue revenue})))
-
-(defn get-all-blocks []
-  {:status 200
-   :body (db/get-all-blocks)})
 
 (defn get-extraction-with-blocks [_]
   (resp/response
@@ -43,8 +40,8 @@
                        :width width-cm
                        :height height-cm})))
     (let [desc (b/describe-block length-cm width-cm height-cm)
-          category (b/determine-category characteristics)
-          class (b/determine-class waste-percentage)]
+          category (b/determine-category length-cm)
+          class (b/determine-class characteristics)]
       (db/update-block!
         {:id id
          :length-cm length-cm
@@ -64,10 +61,14 @@
      :body {:ok true}}))
 
 (defn describe-block [req]
-  (let [{:keys [length-cm width-cm height-cm]} (:body req)
-        desc (b/describe-block length-cm width-cm height-cm)]
+  (let [{:keys [length-cm width-cm height-cm characteristics]} (:body req)
+        desc     (b/describe-block length-cm width-cm height-cm)
+        class    (b/determine-class characteristics)
+        category (b/determine-category length-cm)]
     {:status 200
-     :body desc}))
+     :body (assoc desc
+             :class class
+             :category category)}))
 
 (defn create-daily-extraction [req]
   (try
@@ -92,3 +93,10 @@
     (catch Exception e
       {:status 500
        :body {:error (.getMessage e)}})))
+
+(defn predict [req]
+  (let [{:keys [month]} (:body req)
+        production (p/estimate-production month)]
+    {:status 200
+     :body {:month month
+            :estimated-production production}}))

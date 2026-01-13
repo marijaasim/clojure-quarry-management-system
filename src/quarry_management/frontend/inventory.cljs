@@ -9,20 +9,6 @@
 (def edit-form (r/atom nil))
 (def edit-error (r/atom nil))
 
-(defn class->waste [cls]
-      (case cls
-            "A" "<=19"
-            "B" "20-40"
-            "C" ">=41"
-            ""))
-
-(defn category->characteristics [cat]
-      (case cat
-            1 "no cracks|minimal cracks|uniform color"
-            2 "visible veins|small cracks|not perfect"
-            3 "many cracks|bad color|deformations"
-            ""))
-
 (def filters
   (r/atom {:mass-range nil
            :date nil
@@ -136,12 +122,11 @@
       (when-let [b @selected-block]
                 (reset! edit-form
                         (assoc b
-                               :characteristics (category->characteristics (:category b))
-                               :waste (class->waste (:class b))
-                               :waste-percentage (case (:class b)
-                                                       "A" 19
-                                                       "B" 30
-                                                       "C" 41)))))
+                               :characteristics
+                               (case (:class b)
+                                     "A" "no cracks|minimal cracks|uniform color"
+                                     "B" "visible veins|small cracks|not perfect"
+                                     "C" "many cracks|bad color|deformations")))))
 
 (defn blocks-table []
       (let [selected-id (:id @selected-block)]
@@ -199,41 +184,16 @@
              [:select
               {:value (:characteristics @edit-form)
                :on-change #(swap! edit-form assoc
-                                  :characteristics
-                                  (.. % -target -value))}
-              [:option "no cracks|minimal cracks|uniform color"]
-              [:option "visible veins|small cracks|not perfect"]
-              [:option "many cracks|bad color|deformations"]]
+                                  :characteristics (.. % -target -value))}
 
-             [:div
-              {:style {:margin-top "6px"
-                       :font-size "13px"
-                       :color "#555"}}
-              (when (:category @edit-form)
-                    (str "Category: " (:category @edit-form)))]
+              [:option {:value "no cracks|minimal cracks|uniform color"}
+               "no cracks|minimal cracks|uniform color"]
 
-             [:div "Waste %"]
-             [:select
-              {:value (:waste @edit-form)
-               :on-change #(let [v (.. % -target -value)]
-                                (swap! edit-form assoc
-                                       :waste v
-                                       :waste-percentage
-                                       (case v
-                                             "<=19" 19
-                                             "20-40" 30
-                                             ">=41" 41
-                                             nil)))}
-              [:option "<=19"]
-              [:option "20-40"]
-              [:option ">=41"]]
+              [:option {:value "visible veins|small cracks|not perfect"}
+               "visible veins|small cracks|not perfect"]
 
-             [:div
-              {:style {:margin-top "6px"
-                       :font-size "13px"
-                       :color "#555"}}
-              (when (:class @edit-form)
-                    (str "Class: " (:class @edit-form)))]
+              [:option {:value "many cracks|bad color|deformations"}
+               "many cracks|bad color|deformations"]]
 
              (when @edit-error
                    [:div {:style {:color "red"
@@ -245,7 +205,7 @@
 
               [:button
                {:on-click
-                #(let [{:keys [length-cm width-cm height-cm waste characteristics]} @edit-form]
+                #(let [{:keys [length-cm width-cm height-cm characteristics]} @edit-form]
                       (cond
                         (or (nil? length-cm)
                             (nil? width-cm)
