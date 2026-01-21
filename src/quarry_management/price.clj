@@ -13,9 +13,6 @@
    ["C" 2] 110
    ["C" 3] 100})
 
-(defn get-prices []
-  {:price-per-ton price-per-ton})
-
 (defn block-price
   "Returns the estimated price of a block based on its class and category, multiplied by weight."
   [block]
@@ -30,14 +27,6 @@
             (+ acc (block-price block)))
           0
           blocks))
-
-(defn revenue-per-day []
-  (let [blocks (db/get-extraction-with-blocks)]
-    (->> blocks
-         (group-by :extraction-date)
-         (map (fn [[date bs]]
-                {:date    date
-                 :revenue (reduce + (map block-price bs))})))))
 
 (defn revenue-on-day [^LocalDate date]
   (let [blocks (db/get-extraction-with-blocks)]

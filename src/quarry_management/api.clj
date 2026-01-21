@@ -8,10 +8,6 @@
   (:import
     [java.time LocalDate]))
 
-(defn get-prices [_request]
-  (resp/response
-    {:price-per-ton price/price-per-ton}))
-
 (defn calculate-price [request]
   (let [{:keys [class category weight]} (:body request)
         price (price/block-price
@@ -33,7 +29,7 @@
 
 (defn update-block [req]
   (let [{:keys [id length-cm width-cm height-cm
-                characteristics waste-percentage]} (:body req)]
+                characteristics]} (:body req)]
     (when-not (and length-cm width-cm height-cm)
       (throw (ex-info "Missing dimensions"
                       {:length length-cm
@@ -94,9 +90,16 @@
       {:status 500
        :body {:error (.getMessage e)}})))
 
-(defn predict [req]
-  (let [{:keys [month]} (:body req)
-        production (p/estimate-production month)]
+(defn predict [_]
+  (try
     {:status 200
-     :body {:month month
-            :estimated-production production}}))
+     :body (p/predict)}
+    (catch Exception e
+      (println "Prediction error:")
+      (.printStackTrace e)
+      {:status 500
+       :body {:error (.getMessage e)}})))
+
+(defn predict-blocks [_]
+  {:status 200
+   :body (p/predict-blocks)})

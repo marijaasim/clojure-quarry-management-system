@@ -87,7 +87,7 @@
                (when @calculated-price
                      [:div {:style {:margin-top "10px"
                                     :font-weight "bold"}}
-                      "Price: " @calculated-price])]
+                      "Price: " @calculated-price " EUR"])]
               [:div {:style {:margin-top "30px"}}
                [:label "Date from: "]
                [:input {:type "date"
@@ -113,4 +113,4 @@
                (when @revenue
                      [:div {:style {:margin-top "10px"
                                     :font-weight "bold"}}
-                      "Revenue: " @revenue])]])}))
+                      "Revenue: " @revenue " EUR"])]])}))

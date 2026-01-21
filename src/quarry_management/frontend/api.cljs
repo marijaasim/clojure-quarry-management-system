@@ -35,11 +35,6 @@
           (.catch (fn [err]
                       (js/console.error "Delete error:" err)))))
 
-(defn get-prices [callback]
-      (-> (fetch-json (str api-url "/prices") {:method "GET"})
-          (.then callback)
-          (.catch #(js/console.error "Error fetching prices:" %))))
-
 (defn calculate-price [class category weight callback]
       (-> (fetch-json (str api-url "/calculate-price")
                       {:method "POST"
@@ -77,9 +72,12 @@
           (.then callback)
           (.catch #(js/console.error "Create daily extraction error:" %))))
 
-(defn predict [month]
+(defn get-prediction []
       (fetch-json
         (str api-url "/api/prediction")
-        {:method "POST"
-         :headers {"Content-Type" "application/json"}
-         :body (js/JSON.stringify #js {:month month})}))
+        {:method "POST"}))
+
+(defn get-block-prediction []
+      (fetch-json
+        (str api-url "/api/block-prediction")
+        {:method "POST"}))

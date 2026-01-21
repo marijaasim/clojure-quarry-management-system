@@ -1,46 +1,169 @@
-(ns quarry-management.prediction)
+(ns quarry-management.prediction
+  (:require
+    [quarry-management.db :as db]
+    [quarry-management.block :as block]
+    [quarry-management.price :as price])
+  (:import
+    (org.apache.commons.math3.stat.regression OLSMultipleLinearRegression)
+    (java.time LocalDate YearMonth DayOfWeek ZoneId)
+    (java.util Date)))
 
-(def working-days-per-month
-  {1 20
-   2 18
-   3 21
-   4 20
-   5 20
-   6 21
-   7 23
-   8 21
-   9 22
-   10 23
-   11 19
-   12 23})
-
-(def season-coefficient
-  {:winter 0.7
-   :spring 1.1
-   :summer 1.0
-   :autumn 1.15})
-
-(defn month->season [month]
+(defn ->local-date [d]
   (cond
-    (#{12 1 2} month) :winter
-    (#{3 4 5} month) :spring
-    (#{6 7 8} month) :summer
-    (#{9 10 11} month) :autumn))
+    (instance? LocalDate d) d
+    (instance? java.sql.Date d) (.toLocalDate d)
+    (instance? java.sql.Timestamp d) (.toLocalDate (.toLocalDateTime d))
+    (instance? Date d)
+    (-> d .toInstant (.atZone (ZoneId/systemDefault)) .toLocalDate)
+    :else nil))
 
-(defn parse-month [yyyy-mm]
-  (Integer/parseInt (subs yyyy-mm 5 7)))
+(defn month-of [^LocalDate d]
+  (YearMonth/of (.getYear d) (.getMonthValue d)))
 
-(defn month-features [yyyy-mm]
-  (let [month (parse-month yyyy-mm)
-        season (month->season month)]
-    {:month yyyy-mm
-     :working-days (working-days-per-month month)
-     :season season
-     :season-coef (season-coefficient season)}))
+(defn working-day? [^LocalDate d]
+  (let [dw (.getDayOfWeek d)]
+    (and (not= dw DayOfWeek/SATURDAY)
+         (not= dw DayOfWeek/SUNDAY))))
 
-(def base-daily-production 100)
+(defn working-days-in-month [^YearMonth ym]
+  (->> (range 1 (inc (.lengthOfMonth ym)))
+       (map #(.atDay ym %))
+       (filter working-day?)
+       count))
 
-(defn estimate-production [yyyy-mm]
-  (let [{:keys [working-days season-coef]} (month-features yyyy-mm)]
-    (* working-days season-coef base-daily-production)))
+(def season-index
+  {12 0.7, 1 0.7, 2 0.7     ; winter
+   3 1.0, 4 1.0, 5 1.0     ; spring
+   6 1.1, 7 1.1, 8 1.1     ; summer
+   9 1.05, 10 1.05, 11 1.05}) ; autumn
 
+(defn finished-rows []
+  (let [raw (db/get-extraction-with-blocks)
+        current (month-of (LocalDate/now))]
+    (->> raw
+         (map #(update % :extraction-date ->local-date))
+         (filter :extraction-date)
+         (filter #(not= (month-of (:extraction-date %)) current)))))
+
+(defn finished-months []
+  (->> (finished-rows)
+       (group-by #(month-of (:extraction-date %)))
+       (sort-by first)))
+
+(defn monthly-dataset [by-month]
+  (map-indexed
+    (fn [idx [ym rs]]
+      (let [total (reduce + 0.0
+                          (map #(double (:extracted-mass-tons %)) rs))
+            days  (working-days-in-month ym)
+            avg   (/ total days)
+            season (season-index (.getMonthValue ym))]
+        {:t idx
+         :season season
+         :avg avg}))
+    by-month))
+
+(defn train-regression [data]
+  (let [xs (map (fn [{:keys [t season]}]
+                  [t season])
+                data)
+        ys (map :avg data)
+        reg (OLSMultipleLinearRegression.)]
+    (.newSampleData reg
+                    (double-array ys)
+                    (into-array (map double-array xs)))
+    reg))
+
+(defn next-unstarted-month []
+  (.plusMonths (month-of (LocalDate/now)) 1))
+
+(defn winter-floor [by-month]
+  (let [winter-months
+        (filter
+          (fn [[ym _]]
+            (contains? #{12 1 2} (.getMonthValue ym)))
+          by-month)
+        avgs
+        (for [[ym rs] winter-months]
+          (let [total (reduce + 0.0
+                              (map #(double (:extracted-mass-tons %)) rs))
+                days (working-days-in-month ym)]
+            (/ total days)))]
+    (when (seq avgs)
+      (* 0.9 (apply min avgs)))))
+
+(defn predict []
+  (let [by-month (finished-months)]
+    (if (< (count by-month) 3)
+      {:year (.getYear (LocalDate/now))
+       :month (.getMonthValue (LocalDate/now))
+       :total-mass 0.0}
+      (let [data   (monthly-dataset by-month)
+            model  (train-regression data)
+            target (next-unstarted-month)
+            t       (count data)
+            season  (season-index (.getMonthValue target))
+            days    (working-days-in-month target)
+            beta (.estimateRegressionParameters model)
+            avg-pred (+ (nth beta 0)
+                        (* (nth beta 1) t)
+                        (* (nth beta 2) season))
+            floor (winter-floor by-month)
+            avg-final (if floor
+                        (max avg-pred floor)
+                        avg-pred)
+            total (* avg-final days)]
+
+        {:year (.getYear target)
+         :month (.getMonthValue target)
+         :total-mass (max 0.0 total)}))))
+
+(defn finished-year-months []
+  (->> (finished-months)
+       (map first)))
+
+(defn block-distributions []
+  (let [months (finished-year-months)]
+    (->> months
+         (map
+           (fn [ym]
+             (let [m (block/monthly-mass-by-class-category ym)
+                   total (reduce + (vals m))]
+               (when (pos? total)
+                 (into {}
+                       (map (fn [[k v]] [k (/ v total)]) m))))))
+         (filter identity))))
+
+(defn global-block-distribution []
+  (let [months (finished-year-months)
+        monthly (map block/monthly-mass-by-class-category months)
+        total-by-key
+        (apply merge-with + monthly)
+        grand-total
+        (reduce + (vals total-by-key))]
+    (when (pos? grand-total)
+      (into {}
+            (map (fn [[k v]]
+                   [k (/ v grand-total)])
+                 total-by-key)))))
+
+(defn predict-blocks []
+  (let [{:keys [total-mass]} (predict)
+        dist (global-block-distribution)
+        blocks
+        (->> dist
+             (map (fn [[k share]]
+                    (let [cls (.toUpperCase (subs (name k) 0 1))
+                          cat (Integer/parseInt (subs (name k) 1))
+                          mass (* total-mass share)
+                          price (get price/price-per-ton [cls cat] 0)
+                          revenue (* mass price)]
+                      {:class cls
+                       :category cat
+                       :total-mass mass
+                       :revenue revenue})))
+             vec)
+        total-revenue (reduce + (map :revenue blocks))]
+
+    {:blocks blocks
+     :total-revenue total-revenue}))

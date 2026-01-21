@@ -23,7 +23,7 @@
 (defn get-extraction-with-blocks []
   (map change_to-
        (jdbc/execute! ds
-                      ["SELECT b.*, d.extraction_date
+                      ["SELECT b.*, d.*
            FROM block b
            JOIN daily_extraction d
              ON b.daily_extraction_id = d.id"])))

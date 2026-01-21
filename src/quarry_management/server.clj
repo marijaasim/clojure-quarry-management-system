@@ -8,7 +8,6 @@
 
 (def app
   (-> (routes
-        (GET "/prices" [] api/get-prices)
         (POST "/calculate-price" req (api/calculate-price req))
         (POST "/revenue-from-to" req (api/calculate-revenue-from-to req))
         (GET "/api/blocks" req (api/get-extraction-with-blocks req))
@@ -16,7 +15,8 @@
         (POST "/api/blocks/delete" req (api/delete-block req))
         (POST "/api/blocks/describe" req (api/describe-block req))
         (POST "/api/daily-extraction/create" req (api/create-daily-extraction req))
-        (POST "/api/prediction" req (api/predict req)))
+        (POST "/api/prediction" req (api/predict req))
+        (POST "/api/block-prediction" req (api/predict-blocks req)))
       (wrap-json-body {:keywords? true})
       wrap-json-response
       (ring.middleware.file/wrap-file "public")))

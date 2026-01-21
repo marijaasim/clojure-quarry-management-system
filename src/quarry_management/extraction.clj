@@ -1,1 +1,0 @@
-(ns quarry-management.extraction)
