@@ -289,3 +289,13 @@ During testing, particular attention was given to boundary values and expected s
 Working on this project enabled me to gain knowledge in the Clojure programming language and to practically apply software engineering principles in the development of a real system. A particularly valuable experience was the application of simple AI methods in a concrete business context, where technology has a direct impact on decision-making.
 
 The project is personally significant to me because it emerged from a real need and has potential for further development and practical application. In the future, the system could be enhanced by adding user authentication, support for multiple user roles, more advanced reports and visual dashboards, as well as expanded analytical and predictive functionalities.
+
+## 13. Additional Note
+
+During the development of this project, I used AI only to help me better understand certain concepts when the official documentation was not clear enough, after which I would implement all I’ve learned myself.
+
+AI was also occasionally used to help understand possible causes of errors during debugging if the error messages were unclear to me.
+
+All code and documentation for this project were written by me. AI was used only as a support for learning and understanding.
+
+I did not use any external projects as a model. I developed the project myself, while consulting with my brother who runs the quarry, who explained what the application really needed to do. I gradually built it to meet these requirements, and for the prediction system, I implemented the simplest model that my brother suggested would be useful.
